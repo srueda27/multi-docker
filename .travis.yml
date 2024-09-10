@@ -1,0 +1,22 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -f ./client/Dockerfile.dev -t srueda27/client-test ./client
+
+script:
+  - docker run -e CI=true srueda27/client-test npm run test 
+
+after_success:
+  - docker build -t srueda27/multi-client ./client
+  - docker build -t srueda27/multi-nginx ./nginx
+  - docker build -t srueda27/multi-api ./api
+  - docker build -t srueda27/multi-worker ./worker
+  # Log in to the docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Take those image and push them to docker hub
+  - docker push srueda27/multi-client
+  - docker push srueda27/multi-nginx
+  - docker push srueda27/multi-api
+  - docker push srueda27/multi-worker
