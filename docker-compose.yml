@@ -1,53 +1,31 @@
-version: '3'
+version: "3"
 services:
-  postgres:
-    image: 'postgres:latest'
-    environment:
-      - POSTGRES_PASSWORD=postgres_password
-  redis:
-    image: 'redis:latest'
-  api:
-    build: 
-      context: ./api
-      dockerfile: Dockerfile.dev
-    volumes:
-      - /api/node_modules
-      - ./api:/api
-    environment:
-    # both hosts here are refences to the services respectively
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - PGUSER=postgres
-      - PGHOST=postgres
-      - PGDATABASE=postgres
-      - PGPASSWORD=postgres_password
-      - PGPORT=5432
   client:
+    image: "srueda27/multi-client"
+    mem_limit: 128m
+    hostname: client
+  api:
+    image: "srueda27/multi-api"
+    mem_limit: 128m
+    hostname: api
     environment:
-      - WDS_SOCKET_PORT=0
-    build:
-      context: ./client
-      dockerfile: Dockerfile.dev
-    volumes:
-      - /client/node_modules
-      - ./client:/client
+      - REDIS_HOST=$REDIS_HOST
+      - REDIS_PORT=$REDIS_PORT
+      - PGUSER=$PGUSER
+      - PGHOST=$PGHOST
+      - PGDATABASE=$PGDATABASE
+      - PGPASSWORD=$PGPASSWORD
+      - PGPORT=$PGPORT
   worker:
-    build:
-      context: ./worker
-      dockerfile: Dockerfile.dev
-    volumes:
-      - /worker/node_modules
-      - ./worker:/worker
+    image: "srueda27/multi-worker"
+    mem_limit: 128m
+    hostname: worker
     environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - REDIS_HOST=$REDIS_HOST
+      - REDIS_PORT=$REDIS_PORT
   nginx:
-    restart: always
-    build: 
-      context: ./nginx
-      dockerfile: Dockerfile.dev
+    image: "srueda27/multi-nginx"
+    mem_limit: 128m
+    hostname: nginx
     ports:
-      - '3050:80'
-    depends_on:
-      - api
-      - client
+      - "80:80"

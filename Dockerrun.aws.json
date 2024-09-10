@@ -1,0 +1,38 @@
+{
+  "AWSEBDockerrunVersion": 2,
+  "containerDefinitions": [
+    {
+      "name": "client",
+      "image": "srueda27/multi-client",
+      // Hostname: is the same to the one given on the Docker services 
+      // Is also an optional field, in case another container needs to reach it 
+      "hostname": "client",
+      // essential: true means that if this container shuts down then all of the other container would do the same
+      "essential": false 
+    },
+    {
+      "name": "api",
+      "image": "srueda27/multi-api",
+      "hostname": "api",
+      "essential": false 
+    },
+    {
+      "name": "nginx",
+      "image": "srueda27/multi-nginx",
+      "essential": true,
+      "portMappings": [
+        {
+          "hostPort": 80,
+          "containerPort": 80
+        }
+      ],
+      "links": ["client", "api"]
+    },
+    {
+      "name": "worker",
+      "image": "srueda27/multi-worker",
+      "essential": false 
+      // No need to have a hostname since no other container is reaching it 
+    }
+  ]
+}
